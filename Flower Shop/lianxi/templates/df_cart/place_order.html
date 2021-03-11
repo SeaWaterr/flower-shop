@@ -1,0 +1,160 @@
+{% extends 'df_user/base.html' %}
+
+{% block head %}{% endblock head %}
+
+{% block body %}
+	<h3 class="common_title">确认收货地址</h3>
+
+	<div class="common_list_con clearfix">
+		<dl>
+			<dt>寄送到：</dt>
+			<dd>{{ user.uaddress }}&nbsp;&nbsp;({{ user.ushou }})&nbsp;&nbsp;{{user.uphone}}</dd>
+		</dl>
+		<a href="/user/site/" class="edit_site">编辑收货地址</a>
+
+	</div>
+	
+	<h3 class="common_title">支付方式</h3>	
+	<div class="common_list_con clearfix">
+		<div class="pay_style_con clearfix">
+			<input type="radio" name="pay_style" checked>
+			<label class="cash">货到付款</label>
+			<input type="radio" name="pay_style">
+			<label class="weixin">微信支付</label>
+			<input type="radio" name="pay_style">
+			<label class="zhifubao"></label>
+			<input type="radio" name="pay_style">
+			<label class="bank">银行卡支付</label>
+		</div>
+	</div>
+
+	<h3 class="common_title">商品列表</h3>
+	
+	<div class="common_list_con clearfix">
+		<ul class="goods_list_th clearfix">
+			<li class="col01">商品名称</li>
+			<li class="col02">商品状态</li>
+			<li class="col03">商品价格</li>
+			<li class="col04">数量</li>
+			<li class="col05">小计</li>		
+		</ul>
+
+		{% for car in cartt %}
+			<ul class="goods_list_td clearfix">
+				<li class="col01">1</li>
+				<li class="col02"><img src="/upload/{{ car.goods.gpic }}/"></li>
+				<li class="col03">{{car.goods.gtitle}}</li>
+				<li class="col04">{{car.goods.gunit}}</li>
+				<li class="col05">{{car.goods.gprice}}</li>
+				<li class="col06">{{ car.count }}</li>
+			</ul>
+		{% endfor %}
+		<!--<ul class="goods_list_td clearfix">-->
+			<!--<li class="col01">2</li>			-->
+			<!--<li class="col02"><img src="/static/images/F4.jpg"></li>-->
+			<!--<li class="col03">阳台盆栽观花植物多品种爆米花</li>-->
+			<!--<li class="col04">带盆载好</li>-->
+			<!--<li class="col05">34.00元</li>-->
+			<!--<li class="col06">1</li>-->
+			<!--<li class="col07">34.00元</li>-->
+		<!--</ul>-->
+	</div>
+
+	<h3 class="common_title">总金额结算</h3>
+
+	<div class="common_list_con clearfix">
+		<div class="settle_con">
+			<div class="total_goods_count">共<em><b id="total_count"></b></em>件商品，总金额<b id="total"></b></div>
+			<div class="transit">运费：<b id="total_y">10元</b></div>
+			<div class="total_pay">实付款：<b id="total_priceee">225.00元</b></div>
+		</div>
+	</div>
+
+	<div class="order_submit clearfix">
+		<a href="javascript:;" id="order_btn" sku_ids = {{cartt}}>提交订单</a>
+	</div>	
+
+	<div class="popup_con">
+		<div class="popup">
+			<p>订单提交成功！</p>
+		</div>
+		
+		<div class="mask"></div>
+	</div>
+	<script type="text/javascript">
+		$('#order_btn').click(function() {
+            // 获取用户选择的地址id, 支付方式, 要购买的商品id字符串
+            carts = $(this).attr('sku_ids')
+            // 组织参数
+            params = { 'carts':carts,}
+            // 发起ajax post请求，访问/order/commit, 传递的参数: carts
+            $.post('/user/order/', params, function (data) {
+                if (carts){
+                    // 创建成功
+                    localStorage.setItem('order_finish',2);
+                    $('.popup_con').fadeIn('fast', function() {
+
+                        setTimeout(function(){
+                            $('.popup_con').fadeOut('fast',function(){
+                                window.location.href = '/user/order/';
+                            });
+                        },3000)
+
+                    });
+                }
+                else{
+                    alert(data.errmsg)
+                }
+            })
+
+
+
+		});
+		//个数
+		function total_s(){
+			tt = 0;
+            $('.goods_list_td').each(function () {
+                tt=parseInt($(this).find('li').eq(5).text())+tt;
+
+                $('#total_count').text(tt);
+            });
+        }
+        //总价
+		function total_all(){
+            total_count=0;
+            total_price=0;
+
+            $('.goods_list_td').each(function () {
+                count=$(this).find('li').eq(4).text();
+                price=$(this).find('li').eq(5).text();
+                total=parseFloat(count)*parseFloat(price);
+                total_count++;
+                total_price+=total;
+                console.log(total_count);
+                total_priceee = parseFloat(total_price) + parseFloat($('#total_y').text());
+				$('#total').text(total_price);
+                $('#total_priceee').text(total_priceee);
+            });
+            // $('#total').text(total_price.toFixed(2));
+            $
+        }
+        total_s()
+		total_all()
+
+
+
+		// $('#order_btn').click(function() {
+		// 	localStorage.setItem('order_finish',2);
+		//
+		// 	$('.popup_con').fadeIn('fast', function() {
+		//
+		// 		setTimeout(function(){
+		// 			$('.popup_con').fadeOut('fast',function(){
+		// 				window.location.href = '/user/order/';
+		// 			});
+		// 		},3000)
+		//
+		// 	});
+		// });
+	</script>
+{% endblock body %}
